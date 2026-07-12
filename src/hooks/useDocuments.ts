@@ -11,7 +11,7 @@ export function useDocuments() {
   const { user } = useAuth();
   const [documents, setDocuments] = useState<DocumentRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [hasError, setHasError] = useState(false);
 
   const refresh = useCallback(async () => {
     if (!user) {
@@ -21,13 +21,13 @@ export function useDocuments() {
     }
 
     setIsLoading(true);
-    setError(null);
+    setHasError(false);
     try {
       const docs = await fetchRecentDocuments(user.id);
       setDocuments(docs);
     } catch (err) {
       console.error(err);
-      setError("No se pudo cargar tu historial de resúmenes.");
+      setHasError(true);
     } finally {
       setIsLoading(false);
     }
@@ -47,5 +47,5 @@ export function useDocuments() {
     [user]
   );
 
-  return { documents, isLoading, error, saveDocument, refresh };
+  return { documents, isLoading, hasError, saveDocument, refresh };
 }

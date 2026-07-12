@@ -8,10 +8,11 @@ import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/useTheme";
 import { useSpeech } from "@/hooks/useSpeech";
 import { useDocuments } from "@/hooks/useDocuments";
-import { generateSummary } from "@/lib/summarize";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { detectLikelyLanguage, generateSummary } from "@/lib/summarize";
 import { deriveTitle } from "@/lib/documents";
 import type { DocumentRecord } from "@/lib/documents";
-import type { SummaryMode } from "@/types";
+import type { SummaryLanguage, SummaryMode } from "@/types";
 
 // Pequeña espera artificial para que la generación se sienta como un
 // proceso real en vez de un parpadeo instantáneo.
@@ -23,11 +24,13 @@ export function SummarizePage() {
   const { theme, toggleTheme } = useTheme();
   const speech = useSpeech();
   const { saveDocument } = useDocuments();
+  const { language, t } = useLanguage();
   const location = useLocation();
 
   const [text, setText] = useState("");
   const [summary, setSummary] = useState("");
   const [mode, setMode] = useState<SummaryMode | null>(null);
+  const [summaryLanguage, setSummaryLanguage] = useState<SummaryLanguage>("es");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -47,6 +50,7 @@ export function SummarizePage() {
       setSummary(doc.brief_summary);
       setMode("breve");
     }
+    setSummaryLanguage(doc.summary_language);
     setIsSaved(true);
   }, [location.state]);
 
@@ -65,18 +69,28 @@ export function SummarizePage() {
     setSummary("");
     setIsSaved(false);
 
+    // El motor es 100% local y no traduce: si el usuario pide inglés sobre
+    // un texto que claramente no lo es, avisamos en vez de "resumir" en el
+    // idioma equivocado.
+    if (language === "en" && detectLikelyLanguage(text) === "es") {
+      setError(t("summarize.notEnglishWarning"));
+      setIsLoading(false);
+      return;
+    }
+
     try {
       await delay(500 + Math.random() * 400);
-      const result = generateSummary(text, selectedMode);
+      const result = generateSummary(text, selectedMode, language);
 
       if (!result.trim()) {
-        setError("No se pudo generar el resumen. Intenta con otro texto.");
+        setError(t("summarize.emptyResultError"));
       } else {
         setSummary(result);
+        setSummaryLanguage(language);
       }
     } catch (err) {
       console.error(err);
-      setError("Ocurrió un error al generar el resumen.");
+      setError(t("summarize.genericError"));
     } finally {
       setIsLoading(false);
     }
@@ -92,11 +106,12 @@ export function SummarizePage() {
         originalText: text,
         briefSummary: mode === "breve" ? summary : null,
         detailedSummary: mode === "detallado" ? summary : null,
+        summaryLanguage,
       });
       setIsSaved(true);
     } catch (err) {
       console.error(err);
-      setError("No se pudo guardar el resumen en tu historial.");
+      setError(t("summarize.saveError"));
     } finally {
       setIsSaving(false);
     }
@@ -111,15 +126,14 @@ export function SummarizePage() {
       <main className="mx-auto max-w-3xl px-6 pb-24 pt-16 sm:pt-24">
         <section className="mb-12 text-center animate-fade-in">
           <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-6xl">
-            Resúmenes claros,
+            {t("hero.title1")}
             <br />
             <span className="bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent">
-              al instante.
+              {t("hero.titleHighlight")}
             </span>
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-balance text-lg text-muted-foreground">
-            Sube un PDF o pega tu texto. Summarify lo resume al instante y te
-            lo lee en voz alta, en español.
+            {t("hero.subtitle")}
           </p>
         </section>
 
@@ -138,7 +152,7 @@ export function SummarizePage() {
               ) : (
                 <AlignLeft className="h-4 w-4" />
               )}
-              Resumen Breve
+              {t("buttons.brief")}
             </Button>
             <Button
               size="lg"
@@ -152,7 +166,7 @@ export function SummarizePage() {
               ) : (
                 <AlignJustify className="h-4 w-4" />
               )}
-              Resumen Detallado
+              {t("buttons.detailed")}
             </Button>
           </div>
 
@@ -164,7 +178,7 @@ export function SummarizePage() {
             isSpeechSupported={speech.isSupported}
             isSpeaking={speech.isSpeaking}
             isPaused={speech.isPaused}
-            onSpeak={() => speech.speak(summary)}
+            onSpeak={() => speech.speak(summary, summaryLanguage)}
             onPause={speech.pause}
             onResume={speech.resume}
             onStop={speech.stop}
@@ -177,8 +191,7 @@ export function SummarizePage() {
 
       <footer className="border-t border-border/60 py-8">
         <p className="text-center text-xs text-muted-foreground">
-          Summarify — hecho con React, TypeScript y un motor de resumen 100%
-          local (sin APIs externas).
+          {t("summarize.footer")}
         </p>
       </footer>
     </div>

@@ -1,8 +1,10 @@
 import { History, LogOut, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface HeaderProps {
   theme: "light" | "dark";
@@ -11,6 +13,7 @@ interface HeaderProps {
 
 export function Header({ theme, onToggleTheme }: HeaderProps) {
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
@@ -31,7 +34,7 @@ export function Header({ theme, onToggleTheme }: HeaderProps) {
                 {user.email}
               </span>
               <Link to="/history">
-                <Button variant="ghost" size="icon" aria-label="Ver historial" className="rounded-full">
+                <Button variant="ghost" size="icon" aria-label={t("header.viewHistory")} className="rounded-full">
                   <History className="h-4 w-4" />
                 </Button>
               </Link>
@@ -39,13 +42,14 @@ export function Header({ theme, onToggleTheme }: HeaderProps) {
                 variant="ghost"
                 size="icon"
                 onClick={signOut}
-                aria-label="Cerrar sesión"
+                aria-label={t("header.signOut")}
                 className="rounded-full"
               >
                 <LogOut className="h-4 w-4" />
               </Button>
             </>
           )}
+          <LanguageToggle />
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
         </div>
       </div>

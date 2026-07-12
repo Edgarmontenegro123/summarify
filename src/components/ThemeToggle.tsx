@@ -1,5 +1,6 @@
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ThemeToggleProps {
   theme: "light" | "dark";
@@ -7,14 +8,14 @@ interface ThemeToggleProps {
 }
 
 export function ThemeToggle({ theme, onToggle }: ThemeToggleProps) {
+  const { t } = useLanguage();
+
   return (
     <Button
       variant="ghost"
       size="icon"
       onClick={onToggle}
-      aria-label={
-        theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"
-      }
+      aria-label={t(theme === "dark" ? "header.themeToLight" : "header.themeToDark")}
       className="rounded-full"
     >
       {theme === "dark" ? (

@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { extractTextFromPdf } from "@/lib/pdf";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface UploadZoneProps {
   text: string;
@@ -13,6 +14,7 @@ interface UploadZoneProps {
 }
 
 export function UploadZone({ text, onTextChange, disabled }: UploadZoneProps) {
+  const { language, t } = useLanguage();
   const [isDragging, setIsDragging] = useState(false);
   const [isParsing, setIsParsing] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -24,7 +26,7 @@ export function UploadZone({ text, onTextChange, disabled }: UploadZoneProps) {
       setError(null);
 
       if (file.type !== "application/pdf") {
-        setError("Solo se admiten archivos PDF.");
+        setError(t("upload.onlyPdfError"));
         return;
       }
 
@@ -32,9 +34,7 @@ export function UploadZone({ text, onTextChange, disabled }: UploadZoneProps) {
       try {
         const extracted = await extractTextFromPdf(file);
         if (!extracted.trim()) {
-          setError(
-            "No se pudo extraer texto de este PDF (¿quizás es una imagen escaneada?)."
-          );
+          setError(t("upload.scannedError"));
           setFileName(null);
         } else {
           onTextChange(extracted);
@@ -42,13 +42,13 @@ export function UploadZone({ text, onTextChange, disabled }: UploadZoneProps) {
         }
       } catch (err) {
         console.error(err);
-        setError("Ocurrió un error al leer el PDF. Intenta con otro archivo.");
+        setError(t("upload.readError"));
         setFileName(null);
       } finally {
         setIsParsing(false);
       }
     },
-    [onTextChange]
+    [onTextChange, t]
   );
 
   const onDrop = useCallback(
@@ -105,27 +105,19 @@ export function UploadZone({ text, onTextChange, disabled }: UploadZoneProps) {
           {isParsing ? (
             <>
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-sm text-muted-foreground">
-                Extrayendo texto del PDF…
-              </p>
+              <p className="text-sm text-muted-foreground">{t("upload.extracting")}</p>
             </>
           ) : fileName ? (
             <>
               <FileText className="h-8 w-8 text-primary" />
               <p className="text-sm font-medium">{fileName}</p>
-              <p className="text-xs text-muted-foreground">
-                Haz clic para reemplazar el archivo
-              </p>
+              <p className="text-xs text-muted-foreground">{t("upload.replaceHint")}</p>
             </>
           ) : (
             <>
               <Upload className="h-8 w-8 text-muted-foreground" />
-              <p className="text-sm font-medium">
-                Arrastra tu PDF aquí o haz clic para buscarlo
-              </p>
-              <p className="text-xs text-muted-foreground">
-                También puedes pegar el texto directamente abajo
-              </p>
+              <p className="text-sm font-medium">{t("upload.dragHint")}</p>
+              <p className="text-xs text-muted-foreground">{t("upload.pasteHint")}</p>
             </>
           )}
         </div>
@@ -136,7 +128,7 @@ export function UploadZone({ text, onTextChange, disabled }: UploadZoneProps) {
 
         <div className="mt-6 flex items-center justify-between">
           <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            O pega tu texto
+            {t("upload.pasteLabel")}
           </span>
           {(text || fileName) && (
             <Button
@@ -147,7 +139,7 @@ export function UploadZone({ text, onTextChange, disabled }: UploadZoneProps) {
               className="h-auto gap-1 px-2 py-1 text-xs text-muted-foreground"
             >
               <X className="h-3 w-3" />
-              Limpiar
+              {t("upload.clear")}
             </Button>
           )}
         </div>
@@ -159,12 +151,14 @@ export function UploadZone({ text, onTextChange, disabled }: UploadZoneProps) {
             setFileName(null);
           }}
           disabled={disabled}
-          placeholder="Pega aquí el texto largo que quieres resumir…"
+          placeholder={t("upload.placeholder")}
           className="mt-2 min-h-[180px] resize-y"
         />
 
         <div className="mt-2 text-right text-xs text-muted-foreground">
-          {charCount.toLocaleString("es")} caracteres
+          {t("upload.charCount", {
+            count: charCount.toLocaleString(language === "en" ? "en-US" : "es"),
+          })}
         </div>
       </CardContent>
     </Card>

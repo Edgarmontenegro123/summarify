@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { SummaryMode } from "@/types";
 
 interface SummaryPanelProps {
@@ -47,6 +48,7 @@ export function SummaryPanel({
   isSaving,
   isSaved,
 }: SummaryPanelProps) {
+  const { t } = useLanguage();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -61,12 +63,16 @@ export function SummaryPanel({
     <Card className="animate-fade-in">
       <CardHeader className="flex-row items-center justify-between space-y-0">
         <CardTitle className="flex items-center gap-2 text-base">
-          {mode === "breve" ? "Resumen breve" : mode === "detallado" ? "Resumen detallado" : "Resumen"}
+          {mode === "breve"
+            ? t("summaryPanel.titleBrief")
+            : mode === "detallado"
+              ? t("summaryPanel.titleDetailed")
+              : t("summaryPanel.titleGeneric")}
         </CardTitle>
 
         {summary && !isLoading && (
           <div className="flex items-center gap-1.5">
-            <Button variant="ghost" size="icon" onClick={handleCopy} aria-label="Copiar resumen">
+            <Button variant="ghost" size="icon" onClick={handleCopy} aria-label={t("summaryPanel.copyAria")}>
               {copied ? <Check className="h-4 w-4 text-primary" /> : <Copy className="h-4 w-4" />}
             </Button>
 
@@ -75,23 +81,23 @@ export function SummaryPanel({
                 {!isSpeaking && (
                   <Button variant="secondary" size="sm" onClick={onSpeak} className="gap-1.5">
                     <Volume2 className="h-4 w-4" />
-                    Leer en voz alta
+                    {t("summaryPanel.readAloud")}
                   </Button>
                 )}
                 {isSpeaking && !isPaused && (
                   <Button variant="secondary" size="sm" onClick={onPause} className="gap-1.5">
                     <Pause className="h-4 w-4" />
-                    Pausar
+                    {t("summaryPanel.pause")}
                   </Button>
                 )}
                 {isSpeaking && isPaused && (
                   <Button variant="secondary" size="sm" onClick={onResume} className="gap-1.5">
                     <Play className="h-4 w-4" />
-                    Reanudar
+                    {t("summaryPanel.resume")}
                   </Button>
                 )}
                 {isSpeaking && (
-                  <Button variant="ghost" size="icon" onClick={onStop} aria-label="Detener lectura">
+                  <Button variant="ghost" size="icon" onClick={onStop} aria-label={t("summaryPanel.stopAria")}>
                     <Square className="h-4 w-4" />
                   </Button>
                 )}
@@ -139,7 +145,7 @@ export function SummaryPanel({
                   ) : (
                     <Save className="h-4 w-4" />
                   )}
-                  {isSaved ? "Guardado en tu historial" : "💾 Guardar en mi historial"}
+                  {isSaved ? t("summaryPanel.saved") : t("summaryPanel.save")}
                 </Button>
               </div>
             )}

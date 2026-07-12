@@ -1,28 +1,42 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { SummaryLanguage } from "@/types";
 
-// Orden de preferencia para español "neutro" latino.
-// es-419 = español latinoamericano genérico (el más "neutro" cuando existe).
-const LANG_PRIORITY = ["es-419", "es-us", "es-mx", "es-co", "es-ar", "es"];
+// Orden de preferencia por idioma. Para español priorizamos variantes
+// latinas "neutras"; para inglés, es-US primero por ser la variante con
+// mejor disponibilidad de voces en la mayoría de los navegadores/SO.
+const LANG_PRIORITY: Record<SummaryLanguage, string[]> = {
+  es: ["es-419", "es-us", "es-mx", "es-co", "es-ar", "es"],
+  en: ["en-us", "en-gb", "en-au", "en"],
+};
 
-function scoreVoice(voice: SpeechSynthesisVoice): number {
+const DEFAULT_LANG: Record<SummaryLanguage, string> = {
+  es: "es-419",
+  en: "en-US",
+};
+
+function scoreVoice(voice: SpeechSynthesisVoice, language: SummaryLanguage): number {
   const lang = voice.lang.toLowerCase();
-  if (!lang.startsWith("es")) return -1;
+  if (!lang.startsWith(language)) return -1;
 
-  const idx = LANG_PRIORITY.indexOf(lang);
+  const priority = LANG_PRIORITY[language];
+  const idx = priority.indexOf(lang);
   if (idx !== -1) return 100 - idx;
 
-  // Cualquier variante es-* que no sea España puntúa mejor que es-ES,
-  // para acercarnos a un acento "neutro" en vez de marcadamente ibérico.
-  if (lang !== "es-es") return 40;
+  // Para español, cualquier variante que no sea España puntúa mejor que
+  // es-ES, para acercarnos a un acento "neutro" en vez de marcadamente
+  // ibérico. El inglés no tiene ese sesgo: cualquier variante no listada
+  // puntúa igual.
+  if (language === "es" && lang !== "es-es") return 40;
 
   return 20;
 }
 
-function pickBestSpanishVoice(
-  voices: SpeechSynthesisVoice[]
+function pickBestVoice(
+  voices: SpeechSynthesisVoice[],
+  language: SummaryLanguage
 ): SpeechSynthesisVoice | null {
   const candidates = voices
-    .map((v) => ({ voice: v, score: scoreVoice(v) }))
+    .map((v) => ({ voice: v, score: scoreVoice(v, language) }))
     .filter((v) => v.score >= 0)
     .sort((a, b) => b.score - a.score);
 
@@ -80,16 +94,16 @@ export function useSpeech() {
   }, [isSupported]);
 
   const speak = useCallback(
-    (text: string) => {
+    (text: string, language: SummaryLanguage = "es") => {
       if (!isSupported || !text.trim()) return;
 
       window.speechSynthesis.cancel();
 
-      const voice = pickBestSpanishVoice(voices);
+      const voice = pickBestVoice(voices, language);
       const chunks = splitIntoChunks(text);
       const utterances = chunks.map((chunk) => {
         const utterance = new SpeechSynthesisUtterance(chunk);
-        utterance.lang = voice?.lang || "es-419";
+        utterance.lang = voice?.lang || DEFAULT_LANG[language];
         if (voice) utterance.voice = voice;
         utterance.rate = 1;
         utterance.pitch = 1;

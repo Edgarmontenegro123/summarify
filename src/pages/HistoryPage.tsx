@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, FileText, History, Loader2, RotateCcw } from "lucide-react";
 import { Header } from "@/components/Header";
@@ -5,20 +6,28 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/useTheme";
 import { useDocuments } from "@/hooks/useDocuments";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { DocumentRecord } from "@/lib/documents";
-
-const dateFormatter = new Intl.DateTimeFormat("es", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-});
 
 export function HistoryPage() {
   const { theme, toggleTheme } = useTheme();
-  const { documents, isLoading, error } = useDocuments();
+  const { documents, isLoading, hasError } = useDocuments();
+  const { language, t } = useLanguage();
   const navigate = useNavigate();
+
+  // Formatea cada fecha con el locale del idioma de la UI (no del idioma
+  // del resumen guardado), consistente con el resto de las etiquetas.
+  const dateFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat(language === "en" ? "en-US" : "es", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    [language]
+  );
 
   const handleReload = (doc: DocumentRecord) => {
     navigate("/", { state: { document: doc } });
@@ -37,14 +46,14 @@ export function HistoryPage() {
             onClick={() => navigate("/")}
           >
             <ArrowLeft className="h-4 w-4" />
-            Volver a Summarify
+            {t("history.back")}
           </Button>
 
           <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
-            Tu historial
+            {t("history.title")}
           </h1>
           <p className="mt-2 text-balance text-muted-foreground">
-            Tus últimos 5 resúmenes guardados.
+            {t("history.subtitle")}
           </p>
         </section>
 
@@ -54,25 +63,24 @@ export function HistoryPage() {
           </div>
         )}
 
-        {!isLoading && error && (
+        {!isLoading && hasError && (
           <Card>
-            <CardContent className="p-6 text-sm text-destructive">{error}</CardContent>
-          </Card>
-        )}
-
-        {!isLoading && !error && documents.length === 0 && (
-          <Card className="animate-fade-in">
-            <CardContent className="flex flex-col items-center gap-3 p-10 text-center">
-              <History className="h-8 w-8 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">
-                Todavía no guardaste ningún resumen. Generá uno y tocá
-                "💾 Guardar en mi historial".
-              </p>
+            <CardContent className="p-6 text-sm text-destructive">
+              {t("history.loadError")}
             </CardContent>
           </Card>
         )}
 
-        {!isLoading && !error && documents.length > 0 && (
+        {!isLoading && !hasError && documents.length === 0 && (
+          <Card className="animate-fade-in">
+            <CardContent className="flex flex-col items-center gap-3 p-10 text-center">
+              <History className="h-8 w-8 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">{t("history.empty")}</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {!isLoading && !hasError && documents.length > 0 && (
           <div className="space-y-4">
             {documents.map((doc) => (
               <Card key={doc.id} className="animate-fade-in">
@@ -85,7 +93,7 @@ export function HistoryPage() {
                       <p className="truncate text-sm font-medium">{doc.title}</p>
                       <p className="mt-0.5 text-xs text-muted-foreground">
                         {dateFormatter.format(new Date(doc.created_at))} ·{" "}
-                        {doc.detailed_summary ? "Resumen detallado" : "Resumen breve"}
+                        {doc.detailed_summary ? t("history.tagDetailed") : t("history.tagBrief")}
                       </p>
                     </div>
                   </div>
@@ -97,7 +105,7 @@ export function HistoryPage() {
                     onClick={() => handleReload(doc)}
                   >
                     <RotateCcw className="h-4 w-4" />
-                    <span className="hidden sm:inline">Recargar</span>
+                    <span className="hidden sm:inline">{t("history.reload")}</span>
                   </Button>
                 </CardContent>
               </Card>
