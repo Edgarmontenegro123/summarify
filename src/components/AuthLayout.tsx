@@ -1,7 +1,7 @@
 import {type ReactNode} from 'react'
 import {Sparkles} from 'lucide-react'
 import {ThemeToggle} from '@/components/ThemeToggle'
-import {useTheme} from '@/hooks/useTheme'
+import {useTheme} from '@/contexts/ThemeContext'
 
 interface AuthLayoutProps {
   title: string
