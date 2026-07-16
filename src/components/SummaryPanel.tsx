@@ -9,11 +9,23 @@ import {
   FileWarning,
   Save,
   Loader2,
+  Download,
+  Printer,
+  FileCode,
+  FileType,
 } from 'lucide-react'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import {Button} from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import {useLanguage} from '@/contexts/LanguageContext'
 import type {SummaryMode} from '@/types'
+
+export type ExportFormat = 'pdf' | 'markdown' | 'text'
 
 interface SummaryPanelProps {
   summary: string
@@ -30,6 +42,7 @@ interface SummaryPanelProps {
   onSave?: () => void
   isSaving?: boolean
   isSaved?: boolean
+  onExport?: (format: ExportFormat) => void
 }
 
 export function SummaryPanel({
@@ -47,6 +60,7 @@ export function SummaryPanel({
   onSave,
   isSaving,
   isSaved,
+  onExport,
 }: SummaryPanelProps) {
   const { t } = useLanguage()
   const [copied, setCopied] = useState(false)
@@ -60,7 +74,7 @@ export function SummaryPanel({
   if (!isLoading && !summary && !error) return null
 
   return (
-    <Card className="animate-fade-in">
+    <Card className="print-summary animate-fade-in">
       <CardHeader className="flex-row items-center justify-between space-y-0">
         <CardTitle className="flex items-center gap-2 text-base">
           {mode === 'breve'
@@ -71,7 +85,7 @@ export function SummaryPanel({
         </CardTitle>
 
         {summary && !isLoading && (
-          <div className="flex items-center gap-1.5">
+          <div className="no-print flex items-center gap-1.5">
             <Button
               variant="ghost"
               size="icon"
@@ -132,6 +146,31 @@ export function SummaryPanel({
                 )}
               </>
             )}
+
+            {onExport && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="secondary" size="sm" className="gap-1.5">
+                    <Download className="h-4 w-4" />
+                    {t('export.button')}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => onExport('pdf')}>
+                    <Printer className="h-4 w-4" />
+                    {t('export.asPdf')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onExport('markdown')}>
+                    <FileCode className="h-4 w-4" />
+                    {t('export.asMarkdown')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onExport('text')}>
+                    <FileType className="h-4 w-4" />
+                    {t('export.asText')}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         )}
       </CardHeader>
@@ -159,7 +198,7 @@ export function SummaryPanel({
             </p>
 
             {onSave && (
-              <div className="mt-5 border-t border-border/60 pt-4">
+              <div className="no-print mt-5 border-t border-border/60 pt-4">
                 <Button
                   variant={isSaved ? 'ghost' : 'secondary'}
                   size="sm"

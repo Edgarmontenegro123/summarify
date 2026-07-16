@@ -37,6 +37,17 @@ interface Translations {
   'summaryPanel.save': string
   'summaryPanel.saved': string
 
+  'export.button': string
+  'export.asPdf': string
+  'export.asMarkdown': string
+  'export.asText': string
+  'export.dateLabel': string
+  'export.languageLabel': string
+  'export.languageEs': string
+  'export.languageEn': string
+  'export.summaryHeading': string
+  'export.fileBaseName': string
+
   'summarize.emptyResultError': string
   'summarize.genericError': string
   'summarize.saveError': string
@@ -93,6 +104,17 @@ export const translations: Record<SummaryLanguage, Translations> = {
     'summaryPanel.stopAria': 'Detener lectura',
     'summaryPanel.save': '💾 Guardar en mi historial',
     'summaryPanel.saved': 'Guardado en tu historial',
+
+    'export.button': 'Exportar',
+    'export.asPdf': 'Exportar como PDF',
+    'export.asMarkdown': 'Exportar como Markdown (.md)',
+    'export.asText': 'Exportar como texto plano (.txt)',
+    'export.dateLabel': 'Fecha de creación',
+    'export.languageLabel': 'Idioma del resumen',
+    'export.languageEs': 'Español',
+    'export.languageEn': 'Inglés',
+    'export.summaryHeading': 'Resumen',
+    'export.fileBaseName': 'resumen_exportado',
 
     'summarize.emptyResultError':
       'No se pudo generar el resumen. Intenta con otro texto.',
@@ -152,6 +174,17 @@ export const translations: Record<SummaryLanguage, Translations> = {
     'summaryPanel.stopAria': 'Stop reading',
     'summaryPanel.save': '💾 Save to my history',
     'summaryPanel.saved': 'Saved to your history',
+
+    'export.button': 'Export',
+    'export.asPdf': 'Export as PDF',
+    'export.asMarkdown': 'Export as Markdown (.md)',
+    'export.asText': 'Export as Plain Text (.txt)',
+    'export.dateLabel': 'Date created',
+    'export.languageLabel': 'Summary language',
+    'export.languageEs': 'Spanish',
+    'export.languageEn': 'English',
+    'export.summaryHeading': 'Summary',
+    'export.fileBaseName': 'summary_export',
 
     'summarize.emptyResultError':
       "Couldn't generate the summary. Try a different text.",

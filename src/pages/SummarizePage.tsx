@@ -4,6 +4,7 @@ import {AlignLeft, AlignJustify, Loader2} from 'lucide-react'
 import {Header} from '@/components/Header'
 import {UploadZone} from '@/components/UploadZone'
 import {SummaryPanel} from '@/components/SummaryPanel'
+import type {ExportFormat} from '@/components/SummaryPanel'
 import {Button} from '@/components/ui/button'
 import {useTheme} from '@/contexts/ThemeContext'
 import {useSpeech} from '@/hooks/useSpeech'
@@ -11,6 +12,7 @@ import {useDocuments} from '@/hooks/useDocuments'
 import {useLanguage} from '@/contexts/LanguageContext'
 import {detectLikelyLanguage, generateSummary} from '@/lib/summarize'
 import {deriveTitle} from '@/lib/documents'
+import {exportSummaryAsMarkdown, exportSummaryAsText} from '@/lib/export'
 import type {DocumentRecord} from '@/lib/documents'
 import type {SummaryLanguage, SummaryMode} from '@/types'
 
@@ -118,6 +120,31 @@ export function SummarizePage() {
     }
   }
 
+  const handleExport = (format: ExportFormat) => {
+    if (!summary) return
+
+    if (format === 'pdf') {
+      window.print()
+      return
+    }
+
+    const input = {
+      title: deriveTitle(text),
+      summary,
+      createdAt: new Date(),
+      dateLabel: t('export.dateLabel'),
+      languageLabel: t('export.languageLabel'),
+      languageName: t(
+        summaryLanguage === 'en' ? 'export.languageEn' : 'export.languageEs'
+      ),
+      summaryHeading: t('export.summaryHeading'),
+      fileBaseName: t('export.fileBaseName'),
+    }
+
+    if (format === 'markdown') exportSummaryAsMarkdown(input)
+    else exportSummaryAsText(input)
+  }
+
   const hasText = text.trim().length > 0
 
   return (
@@ -125,7 +152,7 @@ export function SummarizePage() {
       <Header theme={theme} onToggleTheme={toggleTheme} />
 
       <main className="mx-auto max-w-3xl px-6 pb-24 pt-16 sm:pt-24">
-        <section className="mb-12 text-center animate-fade-in">
+        <section className="no-print mb-12 text-center animate-fade-in">
           <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-6xl">
             {t('hero.title1')}
             <br />
@@ -139,13 +166,15 @@ export function SummarizePage() {
         </section>
 
         <div className="space-y-6">
-          <UploadZone
-            text={text}
-            onTextChange={handleTextChange}
-            disabled={isLoading}
-          />
+          <div className="no-print">
+            <UploadZone
+              text={text}
+              onTextChange={handleTextChange}
+              disabled={isLoading}
+            />
+          </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="no-print flex flex-col gap-3 sm:flex-row">
             <Button
               size="lg"
               className="flex-1 gap-2"
@@ -190,11 +219,12 @@ export function SummarizePage() {
             onSave={handleSave}
             isSaving={isSaving}
             isSaved={isSaved}
+            onExport={handleExport}
           />
         </div>
       </main>
 
-      <footer className="border-t border-border/60 py-8">
+      <footer className="no-print border-t border-border/60 py-8">
         <p className="text-center text-xs text-muted-foreground">
           {t('summarize.footer')}
         </p>

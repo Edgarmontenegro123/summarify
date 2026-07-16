@@ -170,3 +170,33 @@
 ::-webkit-scrollbar-thumb:hover {
   background: color-mix(in srgb, var(--muted-foreground) 50%, transparent);
 }
+
+/* Exportar a PDF via window.print(): oculta toda la UI que no sea el
+   resumen (header, hero, upload zone, botones, footer) y reformatea el
+   contenedor del resumen para una hoja A4 en blanco y negro. */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-summary {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    color: #000 !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  .print-summary p {
+    break-inside: avoid;
+  }
+
+  @page {
+    size: A4;
+    margin: 2cm;
+  }
+}
