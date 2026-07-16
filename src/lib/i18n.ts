@@ -62,6 +62,8 @@ interface Translations {
   'history.reload': string
   'history.tagBrief': string
   'history.tagDetailed': string
+
+  'offline.banner': string
 }
 
 export const translations: Record<SummaryLanguage, Translations> = {
@@ -134,6 +136,9 @@ export const translations: Record<SummaryLanguage, Translations> = {
     'history.reload': 'Recargar',
     'history.tagBrief': 'Resumen breve',
     'history.tagDetailed': 'Resumen detallado',
+
+    'offline.banner':
+      'Estás sin conexión. Podés seguir resumiendo, leyendo y exportando — se guardará cuando vuelva internet.',
   },
   en: {
     'header.viewHistory': 'View history',
@@ -204,6 +209,9 @@ export const translations: Record<SummaryLanguage, Translations> = {
     'history.reload': 'Reload',
     'history.tagBrief': 'Brief summary',
     'history.tagDetailed': 'Detailed summary',
+
+    'offline.banner':
+      "You're offline. You can keep summarising, reading, and exporting — saving will resume once you're back online.",
   },
 }
 
