@@ -3,7 +3,6 @@ import {FileText, Upload, X, Loader2} from 'lucide-react'
 import {Card, CardContent} from '@/components/ui/card'
 import {Textarea} from '@/components/ui/textarea'
 import {Button} from '@/components/ui/button'
-import {extractTextFromPdf} from '@/lib/pdf'
 import {cn} from '@/lib/utils'
 import {useLanguage} from '@/contexts/LanguageContext'
 
@@ -32,6 +31,10 @@ export function UploadZone({ text, onTextChange, disabled }: UploadZoneProps) {
 
       setIsParsing(true)
       try {
+        // Carga diferida: pdfjs-dist (y su worker de ~2MB) solo se
+        // descarga cuando el usuario efectivamente sube un PDF, no en el
+        // bundle inicial de la app.
+        const {extractTextFromPdf} = await import('@/lib/pdf')
         const extracted = await extractTextFromPdf(file)
         if (!extracted.trim()) {
           setError(t('upload.scannedError'))
