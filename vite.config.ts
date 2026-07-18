@@ -12,6 +12,12 @@ export default defineConfig({
     VitePWA({
       registerType: "prompt",
       injectRegister: null,
+      workbox: {
+        globPatterns: ["**/*.{js,mjs,css,html,ico,png,svg,webmanifest}"],
+        // El worker de pdfjs-dist (~2.2 MB) supera el limite por defecto de
+        // Workbox (2 MiB) para precachear un archivo individual.
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+      },
       manifest: {
         name: "Summarify",
         short_name: "Summarify",
