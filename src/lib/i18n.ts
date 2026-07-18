@@ -51,6 +51,7 @@ interface Translations {
   'summarize.emptyResultError': string
   'summarize.genericError': string
   'summarize.saveError': string
+  'summarize.savePending': string
   'summarize.notEnglishWarning': string
   'summarize.footer': string
 
@@ -185,6 +186,8 @@ export const translations: Record<SummaryLanguage, Translations> = {
       'No se pudo generar el resumen. Intenta con otro texto.',
     'summarize.genericError': 'Ocurrió un error al generar el resumen.',
     'summarize.saveError': 'No se pudo guardar el resumen en tu historial.',
+    'summarize.savePending':
+      'Sin conexión: resumen guardado localmente. Se sincronizará con tu historial cuando vuelvas a estar online.',
     'summarize.notEnglishWarning':
       'Para generar resúmenes en inglés, por favor introduce un texto originalmente en inglés (el motor local no traduce de forma automática).',
     'summarize.footer':
@@ -329,6 +332,8 @@ export const translations: Record<SummaryLanguage, Translations> = {
       "Couldn't generate the summary. Try a different text.",
     'summarize.genericError': 'Something went wrong generating the summary.',
     'summarize.saveError': "Couldn't save the summary to your history.",
+    'summarize.savePending':
+      "You're offline: the summary was saved locally. It'll sync to your history once you're back online.",
     'summarize.notEnglishWarning':
       "To generate summaries in English, please provide text that's originally in English (the local engine doesn't translate automatically).",
     'summarize.footer':

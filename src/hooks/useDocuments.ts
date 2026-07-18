@@ -60,10 +60,15 @@ export function useDocuments() {
   const saveDocument = useCallback(
     async (input: Omit<SaveDocumentInput, 'userId'>) => {
       if (!user) throw new Error('No hay sesión activa.')
-      const saved = await saveDocumentRequest({ ...input, userId: user.id })
-      setDocuments((prev) => [saved, ...prev].slice(0, 5))
-      upsertCachedDocument(saved)
-      return saved
+      const result = await saveDocumentRequest({ ...input, userId: user.id })
+      setDocuments((prev) => [result.document, ...prev].slice(0, 5))
+      // La cache principal de IndexedDB solo refleja guardados confirmados
+      // en Supabase. Si quedo 'pending', useSync la agrega recien cuando
+      // el reintento tenga exito — asi el fallback offline de refresh()
+      // nunca muestra un documento que en realidad todavia no llego al
+      // servidor.
+      if (result.status === 'saved') upsertCachedDocument(result.document)
+      return result
     },
     [user]
   )

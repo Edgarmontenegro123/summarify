@@ -13,6 +13,7 @@ import {
   Printer,
   FileCode,
   FileType,
+  WifiOff,
 } from 'lucide-react'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import {Button} from '@/components/ui/button'
@@ -42,6 +43,7 @@ interface SummaryPanelProps {
   onSave?: () => void
   isSaving?: boolean
   isSaved?: boolean
+  saveNotice?: string | null
   onExport?: (format: ExportFormat) => void
 }
 
@@ -60,6 +62,7 @@ export function SummaryPanel({
   onSave,
   isSaving,
   isSaved,
+  saveNotice,
   onExport,
 }: SummaryPanelProps) {
   const { t } = useLanguage()
@@ -215,6 +218,13 @@ export function SummaryPanel({
                   )}
                   {isSaved ? t('summaryPanel.saved') : t('summaryPanel.save')}
                 </Button>
+
+                {saveNotice && (
+                  <div className="mt-3 flex items-start gap-2 rounded-xl bg-amber-500/15 p-3 text-xs text-amber-600 dark:text-amber-400">
+                    <WifiOff className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    <p>{saveNotice}</p>
+                  </div>
+                )}
               </div>
             )}
           </>

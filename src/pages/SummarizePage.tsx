@@ -37,6 +37,7 @@ export function SummarizePage() {
   const [error, setError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [isSaved, setIsSaved] = useState(false)
+  const [saveNotice, setSaveNotice] = useState<string | null>(null)
 
   // Cuando venimos de "Recargar resumen" en /history, precargamos el
   // documento elegido en vez de arrancar de una pantalla vacía.
@@ -60,6 +61,7 @@ export function SummarizePage() {
   const handleTextChange = (value: string) => {
     setText(value)
     setIsSaved(false)
+    setSaveNotice(null)
   }
 
   const handleSummarize = async (selectedMode: SummaryMode) => {
@@ -71,6 +73,7 @@ export function SummarizePage() {
     setMode(selectedMode)
     setSummary('')
     setIsSaved(false)
+    setSaveNotice(null)
 
     // El motor es 100% local y no traduce: si el usuario pide inglés sobre
     // un texto que claramente no lo es, avisamos en vez de "resumir" en el
@@ -103,8 +106,9 @@ export function SummarizePage() {
     if (!summary || isSaving || isSaved) return
 
     setIsSaving(true)
+    setSaveNotice(null)
     try {
-      await saveDocument({
+      const result = await saveDocument({
         title: deriveTitle(text),
         originalText: text,
         briefSummary: mode === 'breve' ? summary : null,
@@ -112,6 +116,14 @@ export function SummarizePage() {
         summaryLanguage,
       })
       setIsSaved(true)
+
+      // Ya quedo guardado localmente (useSync lo sincroniza solo cuando
+      // vuelva la conexion) — se avisa sin bloquear el flujo, mismo
+      // criterio que el resto de la app ante falta de red.
+      if (result.status === 'pending') {
+        setSaveNotice(t('summarize.savePending'))
+        setTimeout(() => setSaveNotice(null), 8000)
+      }
     } catch (err) {
       console.error(err)
       setError(t('summarize.saveError'))
@@ -219,6 +231,7 @@ export function SummarizePage() {
             onSave={handleSave}
             isSaving={isSaving}
             isSaved={isSaved}
+            saveNotice={saveNotice}
             onExport={handleExport}
           />
         </div>

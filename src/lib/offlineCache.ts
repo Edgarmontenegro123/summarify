@@ -1,5 +1,5 @@
 import {openDB, type DBSchema, type IDBPDatabase} from 'idb'
-import type {DocumentRecord} from '@/lib/documents'
+import type {DocumentRecord, PendingWrite} from '@/lib/documents'
 
 interface OfflineCacheSchema extends DBSchema {
   documents: {
@@ -7,20 +7,34 @@ interface OfflineCacheSchema extends DBSchema {
     value: DocumentRecord
     indexes: { 'by-user': string }
   }
+  pending_writes: {
+    key: string
+    value: PendingWrite
+  }
 }
 
 const DB_NAME = 'summarify-offline-cache'
-const DB_VERSION = 1
+const DB_VERSION = 2
 const STORE_NAME = 'documents'
+const PENDING_STORE = 'pending_writes'
 
 let dbPromise: Promise<IDBPDatabase<OfflineCacheSchema>> | null = null
 
 function getDb() {
   if (!dbPromise) {
     dbPromise = openDB<OfflineCacheSchema>(DB_NAME, DB_VERSION, {
+      // db.objectStoreNames.contains(...) evita recrear "documents" al
+      // subir de la v1 (solo tenia ese store) a la v2 — el callback de
+      // upgrade corre tanto para una base nueva (oldVersion 0) como para
+      // una que ya existia.
       upgrade(db) {
-        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' })
-        store.createIndex('by-user', 'user_id')
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' })
+          store.createIndex('by-user', 'user_id')
+        }
+        if (!db.objectStoreNames.contains(PENDING_STORE)) {
+          db.createObjectStore(PENDING_STORE, { keyPath: 'id' })
+        }
       },
     })
   }
@@ -80,6 +94,39 @@ export async function clearCachedDocuments(userId: string): Promise<void> {
     const keys = await tx.store.index('by-user').getAllKeys(userId)
     await Promise.all(keys.map((key) => tx.store.delete(key)))
     await tx.done
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+export async function addPendingWrite(write: PendingWrite): Promise<void> {
+  try {
+    const db = await getDb()
+    await db.put(PENDING_STORE, write)
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+// Orden ascendente por createdAt: los guardados offline se sincronizan en
+// el mismo orden en que se generaron.
+export async function getPendingWrites(): Promise<PendingWrite[]> {
+  try {
+    const db = await getDb()
+    const writes = await db.getAll(PENDING_STORE)
+    return writes.sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    )
+  } catch (err) {
+    console.error(err)
+    return []
+  }
+}
+
+export async function removePendingWrite(id: string): Promise<void> {
+  try {
+    const db = await getDb()
+    await db.delete(PENDING_STORE, id)
   } catch (err) {
     console.error(err)
   }

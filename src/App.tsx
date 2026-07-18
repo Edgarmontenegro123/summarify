@@ -3,6 +3,7 @@ import {ProtectedRoute} from '@/components/ProtectedRoute'
 import {PublicOnlyRoute} from '@/components/PublicOnlyRoute'
 import {OfflineBanner} from '@/components/OfflineBanner'
 import {UpdateBanner} from '@/components/UpdateBanner'
+import {useSync} from '@/hooks/useSync'
 import {LoginPage} from '@/pages/LoginPage'
 import {RegisterPage} from '@/pages/RegisterPage'
 import {ForgotPasswordPage} from '@/pages/ForgotPasswordPage'
@@ -11,6 +12,8 @@ import {SummarizePage} from '@/pages/SummarizePage'
 import {HistoryPage} from '@/pages/HistoryPage'
 
 export default function App() {
+  useSync()
+
   return (
     <>
       <OfflineBanner />
