@@ -64,6 +64,17 @@ interface Translations {
   'history.tagBrief': string
   'history.tagDetailed': string
   'history.offlineBadge': string
+  'history.deleteAria': string
+  'history.deleteConfirmTitle': string
+  'history.deleteConfirmBody': string
+  'history.deleteCancel': string
+  'history.deleteConfirm': string
+  'history.deleteError': string
+  'history.filterLabel': string
+  'history.filterAll': string
+  'history.filterEs': string
+  'history.filterEn': string
+  'history.filterEmpty': string
 
   'offline.banner': string
 
@@ -203,6 +214,19 @@ export const translations: Record<SummaryLanguage, Translations> = {
     'history.tagBrief': 'Resumen breve',
     'history.tagDetailed': 'Resumen detallado',
     'history.offlineBadge': 'Offline',
+    'history.deleteAria': 'Eliminar resumen',
+    'history.deleteConfirmTitle': '¿Eliminar este resumen?',
+    'history.deleteConfirmBody':
+      'Esta acción no se puede deshacer. El resumen se borrará de tu historial de forma permanente.',
+    'history.deleteCancel': 'Cancelar',
+    'history.deleteConfirm': 'Eliminar',
+    'history.deleteError':
+      'No se pudo eliminar el resumen (¿estás sin conexión?). Intenta de nuevo.',
+    'history.filterLabel': 'Filtrar por idioma',
+    'history.filterAll': 'Todos',
+    'history.filterEs': 'Español',
+    'history.filterEn': 'Inglés',
+    'history.filterEmpty': 'No hay resúmenes guardados en este idioma.',
 
     'offline.banner':
       'Estás sin conexión. Podés seguir resumiendo, leyendo y exportando — se guardará cuando vuelva internet.',
@@ -349,6 +373,19 @@ export const translations: Record<SummaryLanguage, Translations> = {
     'history.tagBrief': 'Brief summary',
     'history.tagDetailed': 'Detailed summary',
     'history.offlineBadge': 'Offline',
+    'history.deleteAria': 'Delete summary',
+    'history.deleteConfirmTitle': 'Delete this summary?',
+    'history.deleteConfirmBody':
+      "This can't be undone. The summary will be permanently removed from your history.",
+    'history.deleteCancel': 'Cancel',
+    'history.deleteConfirm': 'Delete',
+    'history.deleteError':
+      "Couldn't delete the summary (are you offline?). Try again.",
+    'history.filterLabel': 'Filter by language',
+    'history.filterAll': 'All',
+    'history.filterEs': 'Spanish',
+    'history.filterEn': 'English',
+    'history.filterEmpty': 'No saved summaries in this language.',
 
     'offline.banner':
       "You're offline. You can keep summarising, reading, and exporting — saving will resume once you're back online.",

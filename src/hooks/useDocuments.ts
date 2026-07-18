@@ -3,6 +3,7 @@ import {useAuth} from '@/contexts/AuthContext'
 import {
   fetchRecentDocuments,
   saveDocument as saveDocumentRequest,
+  deleteDocument as deleteDocumentRequest,
   type DocumentRecord,
   type SaveDocumentInput,
 } from '@/lib/documents'
@@ -10,6 +11,7 @@ import {
   getCachedDocuments,
   setCachedDocuments,
   upsertCachedDocument,
+  deleteCachedDocument,
 } from '@/lib/offlineCache'
 
 export function useDocuments() {
@@ -73,5 +75,22 @@ export function useDocuments() {
     [user]
   )
 
-  return { documents, isLoading, hasError, isFromCache, saveDocument, refresh }
+  const deleteDocument = useCallback(async (id: string) => {
+    // Requiere red (ver comentario en lib/documents.ts) — si falla, se
+    // propaga tal cual para que HistoryPage muestre el error, sin tocar
+    // el estado local ni la cache.
+    await deleteDocumentRequest(id)
+    setDocuments((prev) => prev.filter((doc) => doc.id !== id))
+    await deleteCachedDocument(id)
+  }, [])
+
+  return {
+    documents,
+    isLoading,
+    hasError,
+    isFromCache,
+    saveDocument,
+    deleteDocument,
+    refresh,
+  }
 }

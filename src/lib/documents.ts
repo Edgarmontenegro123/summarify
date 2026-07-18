@@ -126,6 +126,17 @@ export async function retryPendingWrite(
   throw error
 }
 
+// Requiere red: a diferencia de saveDocument, un borrado offline no se
+// encola. Encolar un delete abriria una segunda cola con su propia logica
+// de conflicto (que pasa si el mismo id tiene a la vez un pending write y
+// un pending delete, o si el usuario borra algo que el cache offline
+// todavia muestra) — se dejo fuera de alcance a proposito; sin red, el
+// boton de borrar simplemente falla y HistoryPage lo informa.
+export async function deleteDocument(id: string): Promise<void> {
+  const { error } = await supabase.from('documents').delete().eq('id', id)
+  if (error) throw error
+}
+
 // Primeras ~60 chars del texto original como titulo automatico, cortado en
 // un espacio para no partir una palabra a la mitad.
 export function deriveTitle(text: string, maxLen = 60): string {

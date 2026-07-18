@@ -87,6 +87,15 @@ export async function upsertCachedDocument(doc: DocumentRecord): Promise<void> {
   }
 }
 
+export async function deleteCachedDocument(id: string): Promise<void> {
+  try {
+    const db = await getDb()
+    await db.delete(STORE_NAME, id)
+  } catch (err) {
+    console.error(err)
+  }
+}
+
 export async function clearCachedDocuments(userId: string): Promise<void> {
   try {
     const db = await getDb()
