@@ -8,6 +8,7 @@ import {
 import type {Session, User} from '@supabase/supabase-js'
 import {supabase} from '@/lib/supabase'
 import {translateAuthError} from '@/lib/authErrors'
+import {clearCachedDocuments} from '@/lib/offlineCache'
 import {useLanguage} from '@/contexts/LanguageContext'
 
 interface AuthResult {
@@ -74,6 +75,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signOut = async () => {
+    // Se limpia antes de cerrar sesion para que, si otro usuario inicia
+    // sesion despues en el mismo dispositivo, no pueda leer offline los
+    // resumenes cacheados de esta cuenta.
+    if (session?.user) await clearCachedDocuments(session.user.id)
     await supabase.auth.signOut()
   }
 

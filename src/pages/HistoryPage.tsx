@@ -1,6 +1,13 @@
 import {useMemo} from 'react'
 import {useNavigate} from 'react-router-dom'
-import {ArrowLeft, FileText, History, Loader2, RotateCcw} from 'lucide-react'
+import {
+  ArrowLeft,
+  FileText,
+  History,
+  Loader2,
+  RotateCcw,
+  WifiOff,
+} from 'lucide-react'
 import {Header} from '@/components/Header'
 import {Card, CardContent} from '@/components/ui/card'
 import {Button} from '@/components/ui/button'
@@ -11,7 +18,7 @@ import type {DocumentRecord} from '@/lib/documents'
 
 export function HistoryPage() {
   const { theme, toggleTheme } = useTheme()
-  const { documents, isLoading, hasError } = useDocuments()
+  const { documents, isLoading, hasError, isFromCache } = useDocuments()
   const { language, t } = useLanguage()
   const navigate = useNavigate()
 
@@ -92,9 +99,17 @@ export function HistoryPage() {
                       <FileText className="h-4 w-4" />
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">
-                        {doc.title}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="truncate text-sm font-medium">
+                          {doc.title}
+                        </p>
+                        {isFromCache && (
+                          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                            <WifiOff className="h-3 w-3" />
+                            {t('history.offlineBadge')}
+                          </span>
+                        )}
+                      </div>
                       <p className="mt-0.5 text-xs text-muted-foreground">
                         {dateFormatter.format(new Date(doc.created_at))} ·{' '}
                         {doc.detailed_summary
