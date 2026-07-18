@@ -1,5 +1,6 @@
 import * as pdfjsLib from 'pdfjs-dist'
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.mjs?url'
+import {reportPdfError} from '@/lib/pdfDebugBus'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker
 
@@ -24,6 +25,7 @@ export async function extractTextFromPdf(file: File): Promise<string> {
     return pageTexts.join('\n\n').replace(/\s+\n/g, '\n').trim()
   } catch (error) {
     console.error('Error de lectura PDF (Detalle):', error)
+    reportPdfError(error)
     throw error
   }
 }
